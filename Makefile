@@ -1,4 +1,6 @@
 all: pingpog
-	qemu-system-i386 ping
+	qemu-system-i386 pingpog
+
 pingpog: pingpog.asm
-	nasm pingpog.asm -o ping
+	nasm pingpog.asm -o pingpog
+

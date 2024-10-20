@@ -1,0 +1,25 @@
+EAX is the full 32-bit value
+AX is the lower 16-bits
+AL is the lower 8 bits
+AH is the bits 8 through 15 (zero-based), the top half of AX
+So AX is composed of AH:AL halves, and is itself the low half of EAX. (The upper half of EAX isn't directly accessible as a 16-bit register; you can shift or rotate EAX if you want to get at it.)
+
+x86-64 CPUs extend the integer registers to 64-bit:
+
+RAX is the full 64-bit value, with EAX and its sub-components mapped to the lower 32 bits. The upper half of 64-bit registers is only accessible in 64-bit mode, unlike 32-bit registers which can be used in any mode on CPUs that support them.
+All of this also applies to EBX/RBX, ECX/RCX, and EDX/RDX. The other registers like EDI/RDI have a DI low 16-bit partial register, but no high-8 part, and the low-8 DIL is only accessible in 64-bit mode: Assembly registers in 64-bit architecture
+
+Writing AL, AH, or AX leaves other bytes unmodified in the full AX/EAX/RAX, for historical reasons. i.e. it has to merge a new AL into the full RAX, for example. (In 32 or 64-bit code, prefer a movzx eax, byte [mem] or movzx eax, word [mem] load if you don't specifically want this merging: Why doesn't GCC use partial registers?)
+
+Writing EAX zero-extends into RAX. (Why do x86-64 instructions on 32-bit registers zero the upper part of the full 64-bit register?)
+
+Again, all of this applies to every register, not just RAX. e.g. writing DI or DIL merges into the old RDI, writing EDI zero-extends and overwrites the full RDI. Same for R10B or R10W writes merging, writing R10D leaving R10 independent of the old R10 value
+
+
+Segments:Offsets---------------------------------
+
+ds:si and es:di mean the segment:offset referred to by the registers in question. This is primarily important when you're working in real mode (where offsets are a maximum of 64K apiece).
+
+In real mode, the segment and offset are combined as segment * 16 + offset.
+
+In protected mode, a segment register holds a "selector". The base address of the memory referred to by the selector isn't directly related to the value of the selector itself -- rather, the selector just acts as an index to look up data in a table. In the usual case, however, this means very little -- most (current) protected mode environments are set up with CS, DS, ES and SS all set up with base addresses of 0 and maximum offsets of 4 Gigabytes, so addressing via DS vs. ES makes no difference.
