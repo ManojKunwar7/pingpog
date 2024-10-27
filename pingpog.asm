@@ -1,3 +1,6 @@
+	;; 2 cs(segment) : 2 ip(pointer) for interrupt handler
+	;; 0x0000:0x0000
+
 	;; Tells the bios where our boot sector seats in bios 
 	org 0x7C00
 	
@@ -20,10 +23,6 @@
 	;; Print it to screen maybe?
 	int 0x10
 
-	;; (ax is 16 bit value) we will assign 0xA000 this to ax(16 bit value) 
-	;; 0xA000 => holds the content display of video mode "0x13" i.e colors(rgb) 
-	mov ax, 0xA000
-	mov es, ax
 	;; This is a formula maybe 
 	
 	
@@ -40,12 +39,29 @@
 ;; 	;; bx is of 16 bit
 	;; 	jb loop
 
-	mov word [ball_x], 0
-	mov word [ball_y], 0						
-	mov word [ball_dx], 1
-	mov word [ball_dy], 1
+ ;; mov word [ball_x], 0
+ ;; mov word [ball_y], 0						
+ ;; mov word [ball_dx], 1
+ ;; mov word [ball_dy], 1
 	
-main_loop:
+	xor ax, ax
+	mov es, ax
+	mov word [es:0x0070] , draw_frame
+	mov word [es:0x0072] , 0x00  
+
+	jmp $
+	
+	
+draw_frame:
+	pusha
+	;; (ax is 16 bit value) we will assign 0xA000 this to ax(16 bit value) 
+	;; 0xA000 => holds the content display of video mode "0x13" i.e colors(rgb) 
+	mov ax, 0xA000
+	mov es, ax
+
+	
+
+	
 	mov ch, 0x00
 	call draw_ball
 	
@@ -59,7 +75,10 @@ main_loop:
 
 	mov ch , 0x0A
 	call draw_ball
-	jmp main_loop 
+	;; iret isused for calling your own interrupt routine
+	;; ret is used when you doing a normal function call
+	popa
+	iret
 
 draw_ball:
 		
@@ -94,8 +113,8 @@ i: dw 0
 j: dw 0
 ball_x: dw 0
 ball_y:	dw 0
-ball_dx: dw 0
-ball_dy: dw 0
+ball_dx: dw 1
+ball_dy: dw 1
 	
 	times 510 - ($-$$) db 0
 	dw 0xaa55
