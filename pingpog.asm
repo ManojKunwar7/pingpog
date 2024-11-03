@@ -8,12 +8,32 @@
 	;; x = register h:l (8:8) (16 bit)
 	;; h = register(higher 8 bit)(zero based maybe ?) , l = lower regsiter (8 bit)
 	;; how to define a varibale (macro) %define (variable_name) (variable_value) 
-	%define ROW 50	
-	%define WIDTH 320
-	%define HEIGHT 200 
+%define ROW 50	
+%define WIDTH 320
+%define HEIGHT 200 
 
-	%define BALL_WIDTH 10
-	%define BALL_HEIGHT 10
+%define BALL_WIDTH 10
+%define BALL_HEIGHT 10
+
+%define COLOR_Black 0
+%define COLOR_Blue 1
+%define COLOR_Green 2
+%define COLOR_Cyan 3
+%define COLOR_Red 4
+%define COLOR_Magenta 5
+%define COLOR_Brown 6
+%define COLOR_LightGray 7
+%define COLOR_DarkGray 8
+%define COLOR_LightBlue 9
+%define COLOR_LightGreen 10
+%define COLOR_LightCyan 11
+%define COLOR_LightRed 12
+%define COLOR_LightMagenta 13
+%define COLOR_Yellow 14
+%define COLOR_White 15
+
+%define BACKGROUND_COLOR COLOR_Red 
+
 	
 	;; Enter video mode
 	mov ah, 0x00
@@ -43,9 +63,13 @@
  ;; mov word [ball_y], 0						
  ;; mov word [ball_dx], 1
  ;; mov word [ball_dy], 1
+
+	mov ch, BACKGROUND_COLOR
+	call fill_screen
 	
-	xor ax, ax 										; 1 ^ 1 = 0 || 1 ^ 0 = 1
+	xor ax, ax  										; 1 ^ 1 = 0 || 1 ^ 0 = 1
 	mov es, ax
+	
 	mov word [es:0x0070] , draw_frame ; ip
 	mov word [es:0x0072] , 0x00				; cs
 
@@ -62,7 +86,7 @@ draw_frame:
 	mov ax, 0xA000
 	mov es, ax
 	
-	mov ch, 0x00
+	mov ch, BACKGROUND_COLOR
 	call draw_ball
 
 	;; Wall Collsion logic
@@ -116,8 +140,28 @@ draw_frame:
 	popa
 	iret
 
-	;; Review this in a book (dry run)
+fill_screen:
+	pusha
+	;; Ch for color
+	;; (Colors for )
+	mov ax, 0xA000
+	mov es, ax
+
+	xor di, di
+	
+.loop:
+	mov BYTE [es:di], ch
+	inc di
+	cmp di, WIDTH * HEIGHT
+	jb .loop
+	
+	popa
+	ret
+
+;; Review this in a book (dry run)
 draw_ball:
+	mov ax, 0x0000
+	mov ds, ax
 		
 	mov word [y], 0
 .y:										;row
